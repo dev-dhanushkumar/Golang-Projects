@@ -10,6 +10,6 @@ type User struct {
 
 //ErrorResponse is interface for sending error message
 type ErrorResponse struct {
-	Code    int
-	Message string
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
