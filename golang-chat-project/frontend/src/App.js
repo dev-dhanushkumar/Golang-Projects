@@ -7,9 +7,9 @@ import {connect, sendMsg} from './api';
 
 class App extends Component {
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
-            ChatHistory : []
+            chatHistory : []
         }
     }
 
@@ -17,17 +17,23 @@ class App extends Component {
         connect((msg) => {
             console.log("New Message");
             this.setState(prevState => ({
-                ChatHistory : [...prevState.ChatHistory,msg]
+                chatHistory : [...prevState.chatHistory,msg]
             }))
             console.log(this.state);
         });
     }
+    send(event) {
+        if (event.keyCode === 13) {
+          sendMsg(event.target.value);
+          event.target.value = "";
+        }
+      }
 
     render() {
         return(
             <div className="App">
-                <Header />
-                <ChatHistory ChatHistory = {this.state.ChatHistory}/>
+                <Header/>
+                <ChatHistory chatHistory = {this.state.chatHistory}/>
                 <ChatInput send = {this.send} />
             </div>
         );
