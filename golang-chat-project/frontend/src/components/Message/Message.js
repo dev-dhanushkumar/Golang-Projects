@@ -4,10 +4,9 @@ import './Message.scss';
 class Message extends Component {
     constructor(props) {
         super((props));
-        let temp = JSON.parse(this.props.message);
         this.state = {
-            message: temp
-        }
+            message: typeof props.message === "string" ? JSON.parse(props.message) : props.message,
+        };
     }
 
     render() {
@@ -16,7 +15,7 @@ class Message extends Component {
                 {this.state.message.body}
             </div>
         );
-    }
+    };
 }
 
 export default Message;
