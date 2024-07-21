@@ -3,7 +3,7 @@
  With the Growing of software, there are many algorithms and methids to ensure data security. We need to keep sensitive information secure in many fields such as user password, file encryption, hard-disk encryption, phone encryption, email content encryption, data encryption in cloud environment etc.
 
  The Symmetric Encryption is one of these method. In this article, We are going to encrypt and decrypt a file using symmetric encryption technique.
-![General Image](/images/GeneralImg.jpg)
+![](/images//GeneralImg.jpg)
     
 
 ## Encryption
