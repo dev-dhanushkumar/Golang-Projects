@@ -15,7 +15,7 @@
 ### Workflow
 
 #### LRU Cache
-![LRU Cache Image](/images//LRU-Cache-page1.png)
+![LRU Cache Image](images//LRU-Cache-page1.png)
 
 #### General Data Structures
 ##### Node
