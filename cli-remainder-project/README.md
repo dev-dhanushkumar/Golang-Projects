@@ -1,4 +1,4 @@
-<center><h2> Golang CLI Task Remainder Tool</h2> </center>
+<center><h2> Golang CLI Task Reminder Tool</h2> </center>
 
 <p style="text-align: justify">I'd be happy to help you write a description for your Golang CLI task reminder project. To make sure I provide the most relevant description, could you please share a few more details about the project? </p>
 <b>For example: </b>
