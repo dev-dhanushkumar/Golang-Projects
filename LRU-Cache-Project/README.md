@@ -17,19 +17,77 @@
 #### LRU Cache
 ![LRU Cache Image](images//LRU-Cache-page1.png)
 
+```go
+type Cache struct {
+	Queue Queue
+	Hash  Hash
+}
+```
+
 #### General Data Structures
 ##### Node
 ![DataStructures](images/Node.png)
+
+```go
+type Node struct {
+	Value string
+	Right *Node
+	Left  *Node
+}
+```
 ##### Queue
 ![DataStructures](images/Queue.png)
+
+```go
+type Queue struct {
+	Head   *Node
+	Tail   *Node
+	Length int
+}
+```
 ##### Hash
 ![DataStructures](images/Hash.png)
+
+```go
+type Hash map[string]*Node
+```
 
 #### Addition of Nodes
 ![Adddition](images/LRU-cache-page3.png)
 
+```go
+func (c *Cache) Add(n *Node) {
+	fmt.Printf("Add: %s\n", n.Value)
+	temp := c.Queue.Head.Right
+
+	c.Queue.Head.Right = n
+	n.Left = c.Queue.Head
+	n.Right = temp
+	temp.Left = n
+
+	c.Queue.Length++
+	if c.Queue.Length > SIZE {
+		c.Remove(c.Queue.Tail.Left)
+	}
+}
+```
+
 #### Deletion of nodes
 ![Delete node](images/LRU-Cache-page4.png)
+
+```go
+func (c *Cache) Remove(n *Node) *Node {
+	fmt.Printf("remove: %s\n", n.Value)
+	left := n.Left
+	right := n.Right
+
+	left.Right = right
+	right.Left = left
+	c.Queue.Length -= 1
+	delete(c.Hash, n.Value)
+	return n
+}
+```
 
 ### Key Insights
 * 🏗️ Building a Cache: The video emphasizes constructing a simple LRU cache in Golang, providing a practical application of data structures in real-world scenarios.
@@ -40,4 +98,3 @@
 * 🚀 Intermediate Level Focus: The content targets those with a solid understanding of Golang, providing a challenge that enhances coding skills and knowledge of data structures.
 * 🎓 Iterative Learning: The coding process is detailed step-by-step, promoting a better understanding of how data structures function together in a cohesive system.
 
-#### Code Soon ...
