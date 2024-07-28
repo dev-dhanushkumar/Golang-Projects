@@ -19,17 +19,17 @@
 
 #### General Data Structures
 ##### Node
-![DataStructures](/images/Node.png)
+![DataStructures](images/Node.png)
 ##### Queue
-![DataStructures](/images/Queue.png)
+![DataStructures](images/Queue.png)
 ##### Hash
-![DataStructures](/images/Hash.png)
+![DataStructures](images/Hash.png)
 
 #### Addition of Nodes
-![Adddition](/images/LRU-cache-page3.png)
+![Adddition](images/LRU-cache-page3.png)
 
 #### Deletion of nodes
-![Delete node](/images/LRU-Cache-page4.png)
+![Delete node](images/LRU-Cache-page4.png)
 
 ### Key Insights
 * 🏗️ Building a Cache: The video emphasizes constructing a simple LRU cache in Golang, providing a practical application of data structures in real-world scenarios.
