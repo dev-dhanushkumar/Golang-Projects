@@ -8,11 +8,11 @@ This project is a load balancer built with Golang. It is a program that keeps tr
 
 ### Load Balancer
 A load balancer is a device or software application that distributes network or application traffic across multiple servers. This distribution helps to improve the performance, reliability, and scalability of web applications and services.
-    ![Load Balancer img](/images/loadbalancer.jpg)
+    ![Load Balancer img](https://github.com/dev-dhanushkumar/Golang-Projects/blob/main/go-loadbalancer/images/loadbalancer.jpg)
 
 ### Reverse proxy
 A reverse proxy is a server that sits between clients and origin servers. It intercepts client requests, processes them, and forwards them to the appropriate origin server.
-    ![Reverse Proxy](/images/reverse-proxy.jpg)
+    ![Reverse Proxy](https://github.com/dev-dhanushkumar/Golang-Projects/blob/main/go-loadbalancer/images/reverse-proxy.jpg)
 
 ### Struct and Functions
 1. Load Balancer Struct:
@@ -71,7 +71,7 @@ A reverse proxy is a server that sits between clients and origin servers. It int
     }
     ```
 
-    ![Struct](/images/struct_function.jpg)
+    ![Struct](https://github.com/dev-dhanushkumar/Golang-Projects/blob/main/go-loadbalancer/images/struct_function.jpg)
 
 ### Server Interface
 This diagram illustrates the `Server` interface, which defines the core functionalities required by a server in your load balancing system.
@@ -90,7 +90,7 @@ This diagram illustrates the `Server` interface, which defines the core function
     }
     ```
 
-    ![Server Interface](/images/Methods.jpg)
+    ![Server Interface](https://github.com/dev-dhanushkumar/Golang-Projects/blob/main/go-loadbalancer/images/Methods.jpg)
 
 ### Load Balancer Workflow
 1. Main Function:
@@ -113,7 +113,7 @@ This diagram illustrates the `Server` interface, which defines the core function
 - Returns the first healthy server found.
 - If no healthy servers are available, it can either wait for a server to recover or return an error to the client.
 
-    ![workflow img](/images/mainFlow.jpg)
+    ![workflow img](https://github.com/dev-dhanushkumar/Golang-Projects/blob/main/go-loadbalancer/images/mainFlow.jpg)
 
 --- 
 
