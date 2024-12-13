@@ -1,4 +1,4 @@
-module github.com/dev-dhanushkumar/golang-projects/golang_task
+module github.com/dev-dhanushkumar/golang-projects/mytask
 
 go 1.23.4
 
