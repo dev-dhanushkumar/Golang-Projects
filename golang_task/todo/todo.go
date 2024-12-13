@@ -3,9 +3,13 @@ package todo
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
+
+	"github.com/alexeyco/simpletable"
 )
 
 // todo struct
@@ -120,6 +124,98 @@ func (t *Todos) Store(filename string) error {
 		return err
 	}
 	return os.WriteFile(filename, data, 0644)
+}
+
+// Print will print out the current todo tasks
+func (t *Todos) Print(status int, cat string) {
+	table := simpletable.New()
+
+	table.Header = &simpletable.Header{
+		Cells: []*simpletable.Cell{
+			{Align: simpletable.AlignCenter, Text: "#"},
+			{Align: simpletable.AlignCenter, Text: "Category"},
+			{Align: simpletable.AlignCenter, Text: "Task"},
+			{Align: simpletable.AlignCenter, Text: "Done?"},
+			{Align: simpletable.AlignCenter, Text: "CreatedAt"},
+			{Align: simpletable.AlignCenter, Text: "CompletedAt"},
+		},
+	}
+
+	var cells [][]*simpletable.Cell
+
+	requestedTodos := []item{}
+
+	for _, todo := range *t {
+		if status == 1 {
+			if todo.Done {
+				requestedTodos = append(requestedTodos, todo)
+			}
+		}
+
+		if status == 0 {
+			if !todo.Done {
+				requestedTodos = append(requestedTodos, todo)
+			}
+		}
+
+		if status != 1 && status != 0 {
+			requestedTodos = append(requestedTodos, todo)
+		}
+	}
+
+	requestedCatTodos := []item{}
+
+	for _, todo := range requestedTodos {
+		if strings.ToLower(todo.Category) == strings.ToLower(cat) || cat == "" {
+			requestedCatTodos = append(requestedCatTodos, todo)
+		}
+	}
+
+	for _, item := range requestedCatTodos {
+		task := item.Task
+		done := "No"
+		completedAt := ""
+
+		if item.Done {
+			task = fmt.Sprintf(item.Task)
+			done = "\u2705"
+		}
+
+		if item.CompletedAt != nil {
+			completedAt = item.CreatedAt.Format("2006-01-02")
+		}
+
+		cells = append(cells, *&[]*simpletable.Cell{
+			{Text: fmt.Sprintf("%d", item.ID)},
+			{Text: item.Category},
+			{Text: task},
+			{Text: done},
+			{Text: item.CreatedAt.Format("2006-01-02")},
+			{Text: completedAt},
+		})
+	}
+
+	table.Body = &simpletable.Body{Cells: cells}
+
+	table.Footer = &simpletable.Footer{Cells: []*simpletable.Cell{
+		{Align: simpletable.AlignLeft, Text: ""},
+		{Align: simpletable.AlignLeft, Span: 5, Text: fmt.Sprintf("You have %d pending todos", t.CountPending())},
+	}}
+
+	table.SetStyle(simpletable.StyleUnicode)
+
+	table.Println()
+}
+
+// CountPending() will print out the pending tasks
+func (t *Todos) CountPending() int {
+	total := 0
+	for _, item := range *t {
+		if !item.Done {
+			total++
+		}
+	}
+	return total
 }
 
 // getIndexByID returns the index from a given item's id
