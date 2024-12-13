@@ -1,6 +1,9 @@
 package todo
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 // todo struct
 type item struct {
@@ -34,4 +37,46 @@ func (t *Todos) Add(task string, cat string) {
 
 	// add a new task to ToDos slice
 	*t = append(*t, todo)
+}
+
+func (t *Todos) Update(id int, task string, cat string, done int) error {
+	ls := *t
+
+	index := t.getIndexByID(id)
+	if index == -1 {
+		return errors.New("invalid ID")
+	}
+
+	if len(task) != 0 {
+		ls[index].Task = task
+	}
+
+	if len(cat) != 0 {
+		ls[index].Category = cat
+	}
+
+	// The Error occurs because we are trying to assign a value of type time.Time
+	// to a variable of type *time.Time . To fix this we can use the new() function to create a new pointer
+	// to time. Time and assing it to CompletedAt. By using &completedAt, we create a new pointer to time . Time that to the CompletedAtvariable
+	if done == 0 {
+		ls[index].Done = false
+		ls[index].CompletedAt = nil
+	} else if done == 1 {
+		ls[index].Done = true
+		completedAt := time.Now()
+		ls[index].CompletedAt = &completedAt // create a new pointer to time.
+	}
+	return nil
+}
+
+// getIndexByID returns the index from a given item's id
+func (t *Todos) getIndexByID(id int) int {
+	index := -1
+	for i, todo := range *t {
+		if todo.ID == id {
+			index = i
+			break
+		}
+	}
+	return index
 }
