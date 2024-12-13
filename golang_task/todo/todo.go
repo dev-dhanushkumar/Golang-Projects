@@ -1,7 +1,10 @@
 package todo
 
 import (
+	"encoding/json"
 	"errors"
+	"log"
+	"os"
 	"time"
 )
 
@@ -67,6 +70,56 @@ func (t *Todos) Update(id int, task string, cat string, done int) error {
 		ls[index].CompletedAt = &completedAt // create a new pointer to time.
 	}
 	return nil
+}
+
+// Delete will delete requested tast from slice Todos
+func (t *Todos) Delete(id int) error {
+	ls := *t
+	index := t.getIndexByID(id)
+	if index == -1 {
+		return errors.New("invalid ID")
+	}
+
+	*t = append(ls[:index], ls[index+1:]...)
+	return nil
+}
+
+// Load will read .todos.json file and update date into Todos slice
+func (t *Todos) Load(filename string) error {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if len(data) == 0 {
+		return err
+	}
+
+	err = json.Unmarshal(data, t)
+	if err != nil {
+		return err
+	}
+
+	// Update nextId based on the loaded tasks
+	if len(*t) > 0 {
+		maxID := (*t)[0].ID
+		for _, todo := range *t {
+			if todo.ID > maxID {
+				maxID = todo.ID
+			}
+		}
+		nextID = maxID + 1
+	}
+	return nil
+}
+
+// Store will write Todos silce data into .todos.json file
+func (t *Todos) Store(filename string) error {
+	data, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filename, data, 0644)
 }
 
 // getIndexByID returns the index from a given item's id
