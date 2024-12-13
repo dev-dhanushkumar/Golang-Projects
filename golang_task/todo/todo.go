@@ -177,7 +177,7 @@ func (t *Todos) Print(status int, cat string) {
 		completedAt := ""
 
 		if item.Done {
-			task = fmt.Sprintf(item.Task)
+			task = fmt.Sprintf("%s", item.Task)
 			done = "\u2705"
 		}
 
