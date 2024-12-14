@@ -1,12 +1,12 @@
 # Golang ToDO List CLI Tool 🛠️
----
+
 
 ## Description
-GoTodo is a straightforward command-line tool designed to help you manage your daily tasks efficiently. Built with Go, it offers a user-friendly interface to create, view, update, and delete tasks, all stored in a local JSON file.
+Mytask is a straightforward command-line tool designed to help you manage your daily tasks efficiently. Built with Go, it offers a user-friendly interface to create, view, update, and delete tasks, all stored in a local JSON file.
 
-![Project Image](https://github.com/dev-dhanushkumar/Golang-Projects/tree/main/golang_task/mytask_list.png)
+![Project Image](https://github.com/dev-dhanushkumar/Golang-Projects/blob/main/golang_task/mytask_list.png)
 
----
+
 ## Table of Content
 - [Description](#description)
 - [Installation](#installation)
@@ -14,9 +14,9 @@ GoTodo is a straightforward command-line tool designed to help you manage your d
 - [Contributing](#contributing)
 - [License](#liclicense)
 
----
+
 ## Installation
-GoTodo is a breeze to install! Here's how to get started:
+Mytask is a breeze to install! Here's how to get started:
 
 ### Prerequisites:
 
@@ -71,7 +71,7 @@ Compile the Go source code to create the executable file:
         ```
     If everything is set up correctly, this command will display the help message for the mytask application.
 
----
+
 ## Usage
 
 ### Initializing GoTodo:
@@ -113,13 +113,11 @@ To delete a task, use the `delete` command followed by the task ID:
 ```bash
 mytask delete -id 1
 ```
----
 
 ## Contributing
 
 If you find a bug or have a feature request, please open an issue on the GitHub repository. Pull requests are also welcome!
 
----
 ## License
 
 This application is licensed under the MIT License. See the LICENSE file for details.
