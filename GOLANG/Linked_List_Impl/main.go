@@ -26,4 +26,8 @@ func main()  {
 	// Remove middle of Node in list
 	list.DeleteMiddleofNode()
 	list.Display()
+
+	// Delete End Node
+	list.DeleteEndofNode()
+	list.Display()
 }

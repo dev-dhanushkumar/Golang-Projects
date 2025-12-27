@@ -161,3 +161,25 @@ func (l *linkedList)DeleteMiddleofNode()  {
 
 	current.next = current.next.next
 }
+
+// Delete End of Node in Linked List
+func (l *linkedList)DeleteEndofNode()  {
+	// Check list if empty
+	if l.head == nil {
+		fmt.Println("linkedList was empty!")
+		return
+	}
+
+	// case 2: only one node
+	if l.head.next == nil {
+		l.head = nil
+		return
+	}
+
+	current := l.head
+	for current.next.next != nil {
+		current = current.next
+	}
+
+	current.next = nil
+}
