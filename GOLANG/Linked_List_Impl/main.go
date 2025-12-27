@@ -22,4 +22,8 @@ func main()  {
 	// Reverse the LinkedList
 	list.ReverseList()
 	list.Display()
+
+	// Remove middle of Node in list
+	list.DeleteMiddleofNode()
+	list.Display()
 }

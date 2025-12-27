@@ -138,3 +138,26 @@ func (l *linkedList)ReverseList()  {
 
 	l.head = prev
 }
+
+// Delete middle of node in Linked List
+func (l *linkedList)DeleteMiddleofNode()  {
+	// case1: check empty list or not
+	if l.head == nil {
+		fmt.Println("Linked list empty!")
+		return
+	}
+
+	// Get length of Linked list
+	len := l.GetLenghtofLinkedList()
+
+	// Get middle value
+	mid := len / 2
+
+	// Traverse to middle of node
+	current := l.head
+	for i := 1; i < mid; i++ {
+		current = current.next
+	}
+
+	current.next = current.next.next
+}
