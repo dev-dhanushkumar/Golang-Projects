@@ -1,6 +1,8 @@
 package Linkedlist
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type node struct {
 	data int
@@ -199,4 +201,41 @@ func (l *linkedList)DeleteBeginningNode()  {
 	}
 
 	l.head = l.head.next
+}
+
+// Reverse Linked list even ppositions only
+func (l *linkedList)ReverseLinkedListEvenPosition()  {
+	// Case1: Check empty list or not
+	if l.head == nil {
+		fmt.Println("Sorry linked list was empty!")
+		return
+	}
+
+	// Get length od linked list
+	//len := l.GetLenghtofLinkedList()
+
+	var even []int
+	idx := 1;
+	current := l.head
+	for current != nil {
+		if idx % 2 == 0 {
+			even = append(even, current.data)
+		}
+		idx++
+		current = current.next
+	}
+
+	fmt.Println("Even List: ", even)
+
+	curr := l.head
+	set_idx := len(even) - 1
+	idx = 1
+	for curr != nil {
+		if idx % 2 == 0 {
+			curr.data = even[set_idx]
+			set_idx--
+		}
+		curr = curr.next
+		idx++
+	}
 }

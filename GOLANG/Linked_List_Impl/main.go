@@ -34,4 +34,14 @@ func main()  {
 	// Delete beginning Node
 	list.DeleteBeginningNode()
 	list.Display()
+
+	// Reverse even position in linked list
+	list.InsertAtEnd(30)
+	list.InsertAtEnd(40)
+	list.InsertAtEnd(50)
+	list.InsertAtEnd(60)
+	list.InsertAtEnd(70)
+	list.InsertAtEnd(80)
+	list.ReverseLinkedListEvenPosition()
+	list.Display()
 }
