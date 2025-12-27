@@ -30,4 +30,8 @@ func main()  {
 	// Delete End Node
 	list.DeleteEndofNode()
 	list.Display()
+
+	// Delete beginning Node
+	list.DeleteBeginningNode()
+	list.Display()
 }

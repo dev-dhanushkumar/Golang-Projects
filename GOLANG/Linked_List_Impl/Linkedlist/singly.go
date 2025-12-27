@@ -183,3 +183,20 @@ func (l *linkedList)DeleteEndofNode()  {
 
 	current.next = nil
 }
+
+// Delete beginning of node in Linked list
+func (l *linkedList)DeleteBeginningNode()  {
+	// case 1: Check list empty
+	if l.head == nil {
+		fmt.Println("Sorry list was empty!")
+		return
+	}
+
+	// case 2 : if only one node there
+	if l.head.next == nil {
+		l.head = nil
+		return
+	}
+
+	l.head = l.head.next
+}
