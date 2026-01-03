@@ -5,20 +5,22 @@ import (
 	"personal-expense-splitting-settlement/internal/middleware"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type RouterConfig struct {
 	AuthHandler       *handler.AuthHandler
 	FriendshipHandler *handler.FriendshipHandler
 	JWTSecret         string
+	Logger            *zap.SugaredLogger
 }
 
 func SetupRouter(config RouterConfig) *gin.Engine {
 	router := gin.New()
 
 	// Global Middleware
-	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+	router.Use(middleware.LoggerMiddleware(config.Logger))
 
 	// Health Check
 	router.GET("/health", func(ctx *gin.Context) {
