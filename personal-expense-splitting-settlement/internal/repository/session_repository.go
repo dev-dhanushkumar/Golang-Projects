@@ -21,7 +21,7 @@ type sessionRepository struct {
 }
 
 // Create New session
-func NewSesionRepository(db *gorm.DB) SessionRepository {
+func NewSessionRepository(db *gorm.DB) SessionRepository {
 	return &sessionRepository{
 		db: db,
 	}
