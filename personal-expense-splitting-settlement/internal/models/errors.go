@@ -7,6 +7,7 @@ var (
 	ErrDuplicateReference  = errors.New("duplicate reference ID")
 	ErrInvalidCredentials  = errors.New("invalid credentials")
 	ErrUserAlreadyExists   = errors.New("user already exists")
+	ErrUserNotFound        = errors.New("user not found")
 	ErrCategoryNotFound    = errors.New("category not found")
 	ErrBudgetNotFound      = errors.New("budget not found")
 	ErrUnauthorized        = errors.New("unauthorized")

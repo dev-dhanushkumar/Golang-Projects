@@ -59,6 +59,7 @@ func main() {
 	db := database.GetDB()
 	userRepo := repository.NewUserRepository(db)
 	sessionRepo := repository.NewSessionRepository(db)
+	friendshipRepo := repository.NewFriendshipRepository(db)
 
 	// Parse JWT expiration
 	jwtExpiry, err := time.ParseDuration(cfg.JWTExpiration)
@@ -69,14 +70,17 @@ func main() {
 	// Initialize services
 	authService := services.NewAuthService(userRepo, cfg.JWTSecret, jwtExpiry, cfg.DataSecret)
 	sessionService := services.NewSessionService(sessionRepo, cfg.JWTSecret, jwtExpiry)
+	friendshipService := services.NewFriendshipService(friendshipRepo, userRepo)
 
 	// Initialize Handler
 	authHandler := handler.NewAuthHandler(authService, sessionService)
+	friendshipHandler := handler.NewFriendshipHandler(friendshipService)
 
 	// Setup Router
 	r := router.SetupRouter(router.RouterConfig{
-		AuthHandler: authHandler,
-		JWTSecret:   cfg.JWTSecret,
+		AuthHandler:       authHandler,
+		FriendshipHandler: friendshipHandler,
+		JWTSecret:         cfg.JWTSecret,
 	})
 
 	// Start server

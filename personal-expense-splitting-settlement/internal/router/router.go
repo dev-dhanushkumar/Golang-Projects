@@ -8,14 +8,16 @@ import (
 )
 
 type RouterConfig struct {
-	AuthHandler *handler.AuthHandler
-	JWTSecret   string
+	AuthHandler       *handler.AuthHandler
+	FriendshipHandler *handler.FriendshipHandler
+	JWTSecret         string
 }
 
 func SetupRouter(config RouterConfig) *gin.Engine {
 	router := gin.New()
 
 	// Global Middleware
+	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
 	// Health Check
@@ -52,6 +54,19 @@ func SetupRouter(config RouterConfig) *gin.Engine {
 			users.PATCH("/me", config.AuthHandler.UpdateProfile)
 			// Balance summary endpoint will be added later when expense module is implemented
 			// users.GET("/me/balance-summary", config.AuthHandler.GetBalanceSummary)
+		}
+
+		// Friendship endpoints
+		friends := v1.Group("/friends")
+		friends.Use(middleware.AuthMiddleware(config.JWTSecret))
+		{
+			friends.POST("/request", config.FriendshipHandler.SendFriendRequest)
+			friends.POST("/:id/accept", config.FriendshipHandler.AcceptFriendRequest)
+			friends.POST("/:id/reject", config.FriendshipHandler.RejectFriendRequest)
+			friends.POST("/:id/block", config.FriendshipHandler.BlockUser)
+			friends.DELETE("/:id", config.FriendshipHandler.RemoveFriend)
+			friends.GET("", config.FriendshipHandler.GetFriends)
+			friends.GET("/pending", config.FriendshipHandler.GetPendingRequests)
 		}
 	}
 
