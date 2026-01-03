@@ -15,6 +15,7 @@ type AuthService interface {
 	Register(req dto.RegisterRequest) (*dto.RegisterResponse, error)
 	Login(req dto.LoginRequest) (*dto.LoginResponse, error)
 	GetProfile(userID uuid.UUID) (*dto.UserResponse, error)
+	UpdateProfile(userID uuid.UUID, req dto.UpdateProfileRequest) (*dto.UserResponse, error)
 }
 
 type authService struct {
@@ -89,7 +90,7 @@ func (s *authService) Register(req dto.RegisterRequest) (*dto.RegisterResponse, 
 			CreatedAt: getUser.CreatedAt,
 		},
 		Tokens: dto.TokenResponse{
-			ExpiresIn: int(s.jwtExpiry),
+			ExpiresIn: int(s.jwtExpiry.Seconds()),
 		},
 	}
 
@@ -116,6 +117,13 @@ func (s *authService) Login(req dto.LoginRequest) (*dto.LoginResponse, error) {
 		return nil, models.ErrUnauthorized
 	}
 
+	// Update last login timestamp
+	now := time.Now()
+	user.LastLoginAt = &now
+	if err := s.userRepo.Update(user); err != nil {
+		// Log error but don't fail login
+	}
+
 	return &dto.LoginResponse{
 		User: dto.UserResponse{
 			ID:        user.ID.String(),
@@ -125,7 +133,7 @@ func (s *authService) Login(req dto.LoginRequest) (*dto.LoginResponse, error) {
 			CreatedAt: user.CreatedAt,
 		},
 		Tokens: dto.TokenResponse{
-			ExpiresIn: int(s.jwtExpiry),
+			ExpiresIn: int(s.jwtExpiry.Seconds()),
 		},
 	}, nil
 }
@@ -143,5 +151,37 @@ func (s *authService) GetProfile(userID uuid.UUID) (*dto.UserResponse, error) {
 		LastName:  user.LastName,
 		CreatedAt: user.CreatedAt,
 	}, nil
+}
 
+func (s *authService) UpdateProfile(userID uuid.UUID, req dto.UpdateProfileRequest) (*dto.UserResponse, error) {
+	user, err := s.userRepo.FindByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update fields if provided
+	if req.FirstName != nil {
+		user.FirstName = *req.FirstName
+	}
+	if req.LastName != nil {
+		user.LastName = *req.LastName
+	}
+	if req.DefaultCurrency != nil {
+		user.DefaultCurrency = *req.DefaultCurrency
+	}
+	if req.ProfileImageURL != nil {
+		user.ProfileImageURL = *req.ProfileImageURL
+	}
+
+	if err := s.userRepo.Update(user); err != nil {
+		return nil, err
+	}
+
+	return &dto.UserResponse{
+		ID:        userID.String(),
+		Email:     user.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		CreatedAt: user.CreatedAt,
+	}, nil
 }

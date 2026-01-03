@@ -20,16 +20,16 @@ type SessionService interface {
 }
 
 type sessionService struct {
-	sesionRepo repository.SessionRepository
-	jwtSecret  string
-	jwtExpiry  time.Duration
+	sessionRepo repository.SessionRepository
+	jwtSecret   string
+	jwtExpiry   time.Duration
 }
 
 func NewSessionService(repo repository.SessionRepository, jwtSecret string, jwtExpiry time.Duration) SessionService {
 	return &sessionService{
-		sesionRepo: repo,
-		jwtSecret:  jwtSecret,
-		jwtExpiry:  jwtExpiry,
+		sessionRepo: repo,
+		jwtSecret:   jwtSecret,
+		jwtExpiry:   jwtExpiry,
 	}
 }
 
@@ -56,7 +56,7 @@ func (s *sessionService) CreateNewSession(userId uuid.UUID, ip, userAgent string
 		CreatedAt:        time.Now(),
 	}
 
-	if err := s.sesionRepo.CreateSession(session); err != nil {
+	if err := s.sessionRepo.CreateSession(session); err != nil {
 		return "", "", err
 	}
 
@@ -66,18 +66,18 @@ func (s *sessionService) CreateNewSession(userId uuid.UUID, ip, userAgent string
 func (s *sessionService) RefreshSession(oldRefreshToken string, ip, userAgent string) (string, string, error) {
 	oldHash := s.hashToken(oldRefreshToken)
 
-	session, err := s.sesionRepo.GetSessionByRefreshToken(oldHash)
+	session, err := s.sessionRepo.GetSessionByRefreshToken(oldHash)
 	if err != nil {
 		return "", "", errors.New("invalid or expired session")
 	}
 
-	s.sesionRepo.RevokeSession(session.ID)
+	s.sessionRepo.RevokeSession(session.ID)
 
 	return s.CreateNewSession(session.UserID, ip, userAgent)
 }
 
 func (s *sessionService) TerminateSession(sessionID uuid.UUID) error {
-	return s.sesionRepo.RevokeSession(sessionID)
+	return s.sessionRepo.RevokeSession(sessionID)
 }
 
 func (s *sessionService) hashToken(token string) string {
@@ -85,5 +85,5 @@ func (s *sessionService) hashToken(token string) string {
 	return hex.EncodeToString(hash[:])
 }
 func (s *sessionService) GetUserSessions(userID uuid.UUID) ([]models.UserSession, error) {
-	return s.sesionRepo.GetActiveSessionByUserID(userID)
+	return s.sessionRepo.GetActiveSessionByUserID(userID)
 }
