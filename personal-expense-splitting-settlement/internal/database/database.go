@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"personal-expense-splitting-settlement/internal/models"
 	"time"
 
 	"go.uber.org/zap"
@@ -22,7 +21,7 @@ type Config struct {
 	SSLMode  string
 }
 
-// connect establishes database connection
+// Connect establishes database connection
 func Connect(config Config) error {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
@@ -43,7 +42,7 @@ func Connect(config Config) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("failed to connec to database: %w", err)
+		return fmt.Errorf("failed to connect to database: %w", err)
 	}
 
 	sqlDB, err := DB.DB()
@@ -59,41 +58,29 @@ func Connect(config Config) error {
 	return nil
 }
 
-// AutoMigration runs datbase migration
-func AutoMigration(sugar *zap.SugaredLogger) error {
-	// Enable UUID extension for PostgresSQL
-	if err := DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error; err != nil {
-		sugar.Warnln("Failed to enable uuid-ossp extension", "error", err)
+// RunMigrationsFromFiles executes SQL migration files
+func RunMigrationsFromFiles(sugar *zap.SugaredLogger) error {
+	sugar.Info("Starting database migrations...")
+
+	if err := RunMigrations(sugar); err != nil {
+		return fmt.Errorf("failed to run migrations: %w", err)
 	}
 
-	if err := DB.Exec("CREATE EXTENSION IF NOT EXISTS \"pgcrypto\"").Error; err != nil {
-		sugar.Warnln("Failed to enable pgcrypt extension", "error", err)
-	}
-
-	err := DB.AutoMigrate(
-		&models.User{},
-		&models.UserSession{},
-	)
-
-	if err != nil {
-		return fmt.Errorf("Failed to migrate database: %w", err)
-	}
-
-	sugar.Info("Database migration completed successfully")
-
+	sugar.Info("Database migrations completed successfully")
 	return nil
 }
 
+// Close closes the database connection
 func Close() error {
 	sqlDB, err := DB.DB()
 	if err != nil {
 		return err
 	}
 
-	// Logger implementation here
 	return sqlDB.Close()
 }
 
+// GetDB returns the database instance
 func GetDB() *gorm.DB {
 	return DB
 }
