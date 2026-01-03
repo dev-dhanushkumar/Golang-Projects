@@ -12,6 +12,7 @@ type RouterConfig struct {
 	AuthHandler       *handler.AuthHandler
 	FriendshipHandler *handler.FriendshipHandler
 	GroupHandler      *handler.GroupHandler
+	ExpenseHandler    *handler.ExpenseHandler
 	JWTSecret         string
 	Logger            *zap.SugaredLogger
 }
@@ -84,6 +85,20 @@ func SetupRouter(config RouterConfig) *gin.Engine {
 			groups.POST("/:id/members", config.GroupHandler.AddMember)
 			groups.DELETE("/:id/members/:user_id", config.GroupHandler.RemoveMember)
 			groups.PATCH("/:id/members/:user_id", config.GroupHandler.UpdateMemberRole)
+			// Group expenses - nested under groups
+			groups.GET("/:id/expenses", config.ExpenseHandler.GetGroupExpenses)
+		}
+
+		// Expense endpoints
+		expenses := v1.Group("/expenses")
+		expenses.Use(middleware.AuthMiddleware(config.JWTSecret))
+		{
+			expenses.POST("", config.ExpenseHandler.CreateExpense)
+			expenses.GET("", config.ExpenseHandler.GetUserExpenses)
+			expenses.GET("/filter", config.ExpenseHandler.GetExpensesWithFilters)
+			expenses.GET("/:id", config.ExpenseHandler.GetExpense)
+			expenses.PATCH("/:id", config.ExpenseHandler.UpdateExpense)
+			expenses.DELETE("/:id", config.ExpenseHandler.DeleteExpense)
 		}
 	}
 
