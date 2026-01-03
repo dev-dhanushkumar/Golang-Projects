@@ -81,6 +81,7 @@ func main() {
 		AuthHandler:       authHandler,
 		FriendshipHandler: friendshipHandler,
 		JWTSecret:         cfg.JWTSecret,
+		Logger:            sugar,
 	})
 
 	// Start server
