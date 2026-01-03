@@ -61,6 +61,8 @@ func main() {
 	sessionRepo := repository.NewSessionRepository(db)
 	friendshipRepo := repository.NewFriendshipRepository(db)
 	groupRepo := repository.NewGroupRepository(db)
+	expenseRepo := repository.NewExpenseRepository(db)
+	expenseParticipantRepo := repository.NewExpenseParticipantRepository(db)
 
 	// Parse JWT expiration
 	jwtExpiry, err := time.ParseDuration(cfg.JWTExpiration)
@@ -73,17 +75,20 @@ func main() {
 	sessionService := services.NewSessionService(sessionRepo, cfg.JWTSecret, jwtExpiry)
 	friendshipService := services.NewFriendshipService(friendshipRepo, userRepo)
 	groupService := services.NewGroupService(groupRepo, userRepo, friendshipRepo)
+	expenseService := services.NewExpenseService(expenseRepo, expenseParticipantRepo, groupRepo, userRepo)
 
 	// Initialize Handler
 	authHandler := handler.NewAuthHandler(authService, sessionService)
 	friendshipHandler := handler.NewFriendshipHandler(friendshipService)
 	groupHandler := handler.NewGroupHandler(groupService)
+	expenseHandler := handler.NewExpenseHandler(expenseService)
 
 	// Setup Router
 	r := router.SetupRouter(router.RouterConfig{
 		AuthHandler:       authHandler,
 		FriendshipHandler: friendshipHandler,
 		GroupHandler:      groupHandler,
+		ExpenseHandler:    expenseHandler,
 		JWTSecret:         cfg.JWTSecret,
 		Logger:            sugar,
 	})
