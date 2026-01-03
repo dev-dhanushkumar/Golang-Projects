@@ -13,6 +13,8 @@ type RouterConfig struct {
 	FriendshipHandler *handler.FriendshipHandler
 	GroupHandler      *handler.GroupHandler
 	ExpenseHandler    *handler.ExpenseHandler
+	SettlementHandler *handler.SettlementHandler
+	BalanceHandler    *handler.BalanceHandler
 	JWTSecret         string
 	Logger            *zap.SugaredLogger
 }
@@ -56,8 +58,8 @@ func SetupRouter(config RouterConfig) *gin.Engine {
 		{
 			users.GET("/me", config.AuthHandler.GetMe)
 			users.PATCH("/me", config.AuthHandler.UpdateProfile)
-			// Balance summary endpoint will be added later when expense module is implemented
-			// users.GET("/me/balance-summary", config.AuthHandler.GetBalanceSummary)
+			users.GET("/me/balance-summary", config.BalanceHandler.GetBalanceSummary)
+			users.GET("/me/balances", config.BalanceHandler.GetUserBalances)
 		}
 
 		// Friendship endpoints
@@ -87,6 +89,10 @@ func SetupRouter(config RouterConfig) *gin.Engine {
 			groups.PATCH("/:id/members/:user_id", config.GroupHandler.UpdateMemberRole)
 			// Group expenses - nested under groups
 			groups.GET("/:id/expenses", config.ExpenseHandler.GetGroupExpenses)
+			// Group balances and settlements
+			groups.GET("/:id/balances", config.BalanceHandler.GetGroupBalances)
+			groups.GET("/:id/settlement-suggestions", config.BalanceHandler.GetGroupSettlementSuggestions)
+			groups.GET("/:id/settlements", config.SettlementHandler.GetGroupSettlements)
 		}
 
 		// Expense endpoints
@@ -96,6 +102,20 @@ func SetupRouter(config RouterConfig) *gin.Engine {
 			expenses.POST("", config.ExpenseHandler.CreateExpense)
 			expenses.GET("", config.ExpenseHandler.GetUserExpenses)
 			expenses.GET("/filter", config.ExpenseHandler.GetExpensesWithFilters)
+
+			// Settlement endpoints
+			settlements := v1.Group("/settlements")
+			settlements.Use(middleware.AuthMiddleware(config.JWTSecret))
+			{
+				settlements.POST("", config.SettlementHandler.CreateSettlement)
+				settlements.GET("", config.SettlementHandler.GetUserSettlements)
+				settlements.GET("/between", config.SettlementHandler.GetSettlementsBetweenUsers)
+				settlements.GET("/suggestions", config.BalanceHandler.GetSettlementSuggestions)
+				settlements.GET("/:id", config.SettlementHandler.GetSettlement)
+				settlements.PATCH("/:id", config.SettlementHandler.UpdateSettlement)
+				settlements.PATCH("/:id/confirm", config.SettlementHandler.ConfirmSettlement)
+				settlements.DELETE("/:id", config.SettlementHandler.DeleteSettlement)
+			}
 			expenses.GET("/:id", config.ExpenseHandler.GetExpense)
 			expenses.PATCH("/:id", config.ExpenseHandler.UpdateExpense)
 			expenses.DELETE("/:id", config.ExpenseHandler.DeleteExpense)
