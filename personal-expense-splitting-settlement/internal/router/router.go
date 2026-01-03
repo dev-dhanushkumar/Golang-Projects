@@ -11,6 +11,7 @@ import (
 type RouterConfig struct {
 	AuthHandler       *handler.AuthHandler
 	FriendshipHandler *handler.FriendshipHandler
+	GroupHandler      *handler.GroupHandler
 	JWTSecret         string
 	Logger            *zap.SugaredLogger
 }
@@ -69,6 +70,20 @@ func SetupRouter(config RouterConfig) *gin.Engine {
 			friends.DELETE("/:id", config.FriendshipHandler.RemoveFriend)
 			friends.GET("", config.FriendshipHandler.GetFriends)
 			friends.GET("/pending", config.FriendshipHandler.GetPendingRequests)
+		}
+
+		// Group endpoints
+		groups := v1.Group("/groups")
+		groups.Use(middleware.AuthMiddleware(config.JWTSecret))
+		{
+			groups.POST("", config.GroupHandler.CreateGroup)
+			groups.GET("", config.GroupHandler.GetUserGroups)
+			groups.GET("/:id", config.GroupHandler.GetGroup)
+			groups.PATCH("/:id", config.GroupHandler.UpdateGroup)
+			groups.DELETE("/:id", config.GroupHandler.DeleteGroup)
+			groups.POST("/:id/members", config.GroupHandler.AddMember)
+			groups.DELETE("/:id/members/:user_id", config.GroupHandler.RemoveMember)
+			groups.PATCH("/:id/members/:user_id", config.GroupHandler.UpdateMemberRole)
 		}
 	}
 
