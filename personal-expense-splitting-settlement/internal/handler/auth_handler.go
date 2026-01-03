@@ -200,3 +200,39 @@ func (h *AuthHandler) GetSessions(ctx *gin.Context) {
 
 	utils.OK(ctx, "Active sessions retrived seccessfully", sessions)
 }
+
+// UpdateProfile handler PATCH /api/v1/users/me
+func (h *AuthHandler) UpdateProfile(ctx *gin.Context) {
+	// Get UserID from Auth middleware
+	userIDRaw, exists := ctx.Get("user_id")
+	if !exists {
+		utils.Unauthorized(ctx, "User not found in context", nil)
+		return
+	}
+
+	userID, ok := userIDRaw.(uuid.UUID)
+	if !ok {
+		utils.InternalServerError(ctx, "Invalid user ID format", nil)
+		return
+	}
+
+	var req dto.UpdateProfileRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		utils.BadRequest(ctx, "Invalid request body", err)
+		return
+	}
+
+	// Validate request
+	if err := validator.Validate(req); err != nil {
+		utils.ValidationErrorResponse(ctx, err.Error())
+		return
+	}
+
+	userProfile, err := h.authService.UpdateProfile(userID, req)
+	if err != nil {
+		utils.InternalServerError(ctx, "Failed to update profile", err)
+		return
+	}
+
+	utils.OK(ctx, "Profile updated successfully", userProfile)
+}
