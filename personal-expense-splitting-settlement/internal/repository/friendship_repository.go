@@ -18,6 +18,7 @@ type FriendshipRepository interface {
 	GetPendingRequestsSent(userID uuid.UUID) ([]models.Friendship, error)
 	GetPendingRequestsReceived(userID uuid.UUID) ([]models.Friendship, error)
 	CheckFriendshipExists(userID1, userID2 uuid.UUID) (bool, error)
+	AreFriends(userID1, userID2 uuid.UUID) (bool, error)
 }
 
 type friendshipRepository struct {
@@ -118,6 +119,21 @@ func (r *friendshipRepository) CheckFriendshipExists(userID1, userID2 uuid.UUID)
 	var count int64
 	err := r.db.Model(&models.Friendship{}).
 		Where("user_id_1 = ? AND user_id_2 = ?", userID1, userID2).
+		Count(&count).Error
+	return count > 0, err
+}
+
+// AreFriends checks if two users are accepted friends
+func (r *friendshipRepository) AreFriends(userID1, userID2 uuid.UUID) (bool, error) {
+	// Normalize user IDs
+	if userID1.String() > userID2.String() {
+		userID1, userID2 = userID2, userID1
+	}
+
+	var count int64
+	err := r.db.Model(&models.Friendship{}).
+		Where("user_id_1 = ? AND user_id_2 = ? AND status = ?",
+			userID1, userID2, models.FriendshipStatusAccepted).
 		Count(&count).Error
 	return count > 0, err
 }
