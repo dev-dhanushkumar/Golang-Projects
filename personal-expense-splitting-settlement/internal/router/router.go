@@ -43,6 +43,16 @@ func SetupRouter(config RouterConfig) *gin.Engine {
 				protected.GET("/sessions", config.AuthHandler.GetSessions)
 			}
 		}
+
+		// User endpoints
+		users := v1.Group("/users")
+		users.Use(middleware.AuthMiddleware(config.JWTSecret))
+		{
+			users.GET("/me", config.AuthHandler.GetMe)
+			users.PATCH("/me", config.AuthHandler.UpdateProfile)
+			// Balance summary endpoint will be added later when expense module is implemented
+			// users.GET("/me/balance-summary", config.AuthHandler.GetBalanceSummary)
+		}
 	}
 
 	return router
