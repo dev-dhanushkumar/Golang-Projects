@@ -63,6 +63,8 @@ func main() {
 	groupRepo := repository.NewGroupRepository(db)
 	expenseRepo := repository.NewExpenseRepository(db)
 	expenseParticipantRepo := repository.NewExpenseParticipantRepository(db)
+	settlementRepo := repository.NewSettlementRepository(db)
+	balanceRepo := repository.NewBalanceRepository(db)
 
 	// Parse JWT expiration
 	jwtExpiry, err := time.ParseDuration(cfg.JWTExpiration)
@@ -76,12 +78,16 @@ func main() {
 	friendshipService := services.NewFriendshipService(friendshipRepo, userRepo)
 	groupService := services.NewGroupService(groupRepo, userRepo, friendshipRepo)
 	expenseService := services.NewExpenseService(expenseRepo, expenseParticipantRepo, groupRepo, userRepo)
+	settlementService := services.NewSettlementService(settlementRepo, userRepo, groupRepo)
+	balanceService := services.NewBalanceService(balanceRepo, groupRepo, userRepo)
 
 	// Initialize Handler
 	authHandler := handler.NewAuthHandler(authService, sessionService)
 	friendshipHandler := handler.NewFriendshipHandler(friendshipService)
 	groupHandler := handler.NewGroupHandler(groupService)
 	expenseHandler := handler.NewExpenseHandler(expenseService)
+	settlementHandler := handler.NewSettlementHandler(settlementService)
+	balanceHandler := handler.NewBalanceHandler(balanceService)
 
 	// Setup Router
 	r := router.SetupRouter(router.RouterConfig{
@@ -89,6 +95,8 @@ func main() {
 		FriendshipHandler: friendshipHandler,
 		GroupHandler:      groupHandler,
 		ExpenseHandler:    expenseHandler,
+		SettlementHandler: settlementHandler,
+		BalanceHandler:    balanceHandler,
 		JWTSecret:         cfg.JWTSecret,
 		Logger:            sugar,
 	})
