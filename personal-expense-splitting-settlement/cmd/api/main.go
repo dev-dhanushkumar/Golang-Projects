@@ -50,15 +50,15 @@ func main() {
 	sugar.Info("Database connection established successfully")
 	defer database.Close()
 
-	// Run migration
-	if err := database.AutoMigration(sugar); err != nil {
+	// Run SQL migrations
+	if err := database.RunMigrationsFromFiles(sugar); err != nil {
 		sugar.Fatalw("Failed to run migrations", "error", err, "db_name", cfg.DBName)
 	}
 
 	// Initialize repository
 	db := database.GetDB()
 	userRepo := repository.NewUserRepository(db)
-	sesionRepo := repository.NewSesionRepository(db)
+	sessionRepo := repository.NewSessionRepository(db)
 
 	// Parse JWT expiration
 	jwtExpiry, err := time.ParseDuration(cfg.JWTExpiration)
@@ -68,7 +68,7 @@ func main() {
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo, cfg.JWTSecret, jwtExpiry, cfg.DataSecret)
-	sessionService := services.NewSessionService(sesionRepo, cfg.JWTSecret, jwtExpiry)
+	sessionService := services.NewSessionService(sessionRepo, cfg.JWTSecret, jwtExpiry)
 
 	// Initialize Handler
 	authHandler := handler.NewAuthHandler(authService, sessionService)
