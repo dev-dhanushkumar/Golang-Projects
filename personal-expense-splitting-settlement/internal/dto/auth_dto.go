@@ -4,7 +4,7 @@ import "time"
 
 type RegisterRequest struct {
 	Email       string `json:"email" validate:"required,email"`
-	Password    string `json:"password" validate:"required,min=6,max=50"`
+	Password    string `json:"password" validate:"required,min=8,max=50,password"`
 	FirstName   string `json:"first_name" validate:"required,min=2,max=255"`
 	LastName    string `json:"last_name" validate:"required,min=2,max=255"`
 	PhoneNumber string `json:"phone_number" validate:"omitempty,min=10,max=20"`
@@ -37,4 +37,11 @@ type LoginRequest struct {
 type LoginResponse struct {
 	User   UserResponse  `json:"user"`
 	Tokens TokenResponse `json:"tokens"`
+}
+
+type UpdateProfileRequest struct {
+	FirstName       *string `json:"first_name" validate:"omitempty,min=2,max=255"`
+	LastName        *string `json:"last_name" validate:"omitempty,min=2,max=255"`
+	DefaultCurrency *string `json:"default_currency" validate:"omitempty,len=3"`
+	ProfileImageURL *string `json:"profile_image_url" validate:"omitempty,url"`
 }
