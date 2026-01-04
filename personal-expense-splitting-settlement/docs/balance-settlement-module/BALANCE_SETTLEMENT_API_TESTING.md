@@ -437,7 +437,7 @@ curl -X GET http://localhost:8080/api/v1/users/me/balance-summary \
 
 ## 👥 Part 3: Group Balances & Settlements
 
-### Step 11: Create a Group
+### Step 11: Create a Group-
 
 **Alice creates a trip group:**
 ```bash
@@ -447,6 +447,7 @@ curl -X POST http://localhost:8080/api/v1/groups \
   -d '{
     "name": "Weekend Trip",
     "description": "Trip to Goa",
+    "type": "Trip"
     "member_emails": ["bob@test.com"]
   }'
 
@@ -467,6 +468,7 @@ curl -X POST http://localhost:8080/api/v1/expenses \
     "amount": 6000.00,
     "category": "accommodation",
     "date": "2026-01-03",
+    "split_method": "exact",
     "group_id": "'$GROUP_ID'",
     "participants": [
       {
@@ -493,6 +495,7 @@ curl -X POST http://localhost:8080/api/v1/expenses \
     "amount": 4000.00,
     "category": "transport",
     "date": "2026-01-03",
+    "split_method": "exact",
     "group_id": "'$GROUP_ID'",
     "participants": [
       {
