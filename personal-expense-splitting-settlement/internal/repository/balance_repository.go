@@ -117,6 +117,7 @@ func (r *balanceRepository) CalculateAllUserBalances(userID uuid.UUID) ([]dto.Ba
 			JOIN expense_participants ep2 ON ep1.expense_id = ep2.expense_id
 			WHERE (ep1.user_id = ? OR ep2.user_id = ?)
 			AND ep1.user_id != ep2.user_id
+			AND ep1.id < ep2.id
 			GROUP BY other_user_id
 		),
 		user_settlements AS (
@@ -127,8 +128,8 @@ func (r *balanceRepository) CalculateAllUserBalances(userID uuid.UUID) ([]dto.Ba
 				END as other_user_id,
 				SUM(
 					CASE 
-						WHEN payer_id = ? THEN -amount 
-						ELSE amount 
+						WHEN payer_id = ? THEN amount 
+						ELSE -amount 
 					END
 				) as settlement_balance
 			FROM settlements
@@ -174,36 +175,82 @@ func (r *balanceRepository) CalculateAllUserBalances(userID uuid.UUID) ([]dto.Ba
 func (r *balanceRepository) CalculateGroupBalances(groupID uuid.UUID) ([]dto.GroupBalanceItem, error) {
 	var results []GroupBalanceResult
 	query := `
+		WITH group_expenses AS (
+			SELECT 
+				ep.user_id,
+				COALESCE(SUM(ep.paid_amount), 0) as total_paid,
+				COALESCE(SUM(ep.owed_amount), 0) as total_owed
+			FROM expense_participants ep
+			INNER JOIN expenses e ON ep.expense_id = e.id 
+			WHERE e.group_id = ? 
+			AND e.deleted_at IS NULL
+			GROUP BY ep.user_id
+		),
+		group_settlements AS (
+			SELECT 
+				user_id,
+				COALESCE(SUM(settlement_adjustment), 0) as settlement_adjustment
+			FROM (
+				SELECT payer_id as user_id, SUM(amount) as settlement_adjustment
+				FROM settlements
+				WHERE group_id = ?
+				AND is_confirmed = true
+				AND deleted_at IS NULL
+				GROUP BY payer_id
+				UNION ALL
+				SELECT payee_id as user_id, -SUM(amount) as settlement_adjustment
+				FROM settlements
+				WHERE group_id = ?
+				AND is_confirmed = true
+				AND deleted_at IS NULL
+				GROUP BY payee_id
+			) combined
+			GROUP BY user_id
+		)
 		SELECT 
 			u.id as user_id,
 			u.first_name,
 			u.last_name,
-			COALESCE(SUM(ep.paid_amount), 0) as total_paid,
-			COALESCE(SUM(ep.owed_amount), 0) as total_owed
+			COALESCE(ge.total_paid, 0) as total_paid,
+			COALESCE(ge.total_owed, 0) as total_owed
 		FROM users u
 		JOIN group_members gm ON u.id = gm.user_id
-		LEFT JOIN expense_participants ep ON u.id = ep.user_id
-		LEFT JOIN expenses e ON ep.expense_id = e.id AND e.group_id = ?
+		LEFT JOIN group_expenses ge ON u.id = ge.user_id
+		LEFT JOIN group_settlements gs ON u.id = gs.user_id
 		WHERE gm.group_id = ?
 		AND gm.left_at IS NULL
-		AND (e.deleted_at IS NULL OR e.deleted_at IS NULL)
-		GROUP BY u.id, u.first_name, u.last_name
-		ORDER BY (COALESCE(SUM(ep.paid_amount), 0) - COALESCE(SUM(ep.owed_amount), 0)) DESC
+		ORDER BY ((COALESCE(ge.total_paid, 0) - COALESCE(ge.total_owed, 0)) + COALESCE(gs.settlement_adjustment, 0)) DESC
 	`
-	err := r.db.Raw(query, groupID, groupID).Scan(&results).Error
+	err := r.db.Raw(query, groupID, groupID, groupID, groupID).Scan(&results).Error
 	if err != nil {
 		return nil, err
 	}
 
-	// Convert to DTO
+	// Convert to DTO and apply settlement adjustments
 	balances := make([]dto.GroupBalanceItem, len(results))
 	for i, result := range results {
+		// Get settlement adjustment for this user
+		var settlementAdjustment float64
+		adjustQuery := `
+			SELECT COALESCE(SUM(settlement_adjustment), 0)
+			FROM (
+				SELECT SUM(amount) as settlement_adjustment
+				FROM settlements
+				WHERE group_id = ? AND payer_id = ? AND is_confirmed = true AND deleted_at IS NULL
+				UNION ALL
+				SELECT -SUM(amount) as settlement_adjustment
+				FROM settlements
+				WHERE group_id = ? AND payee_id = ? AND is_confirmed = true AND deleted_at IS NULL
+			) combined
+		`
+		r.db.Raw(adjustQuery, groupID, result.UserID, groupID, result.UserID).Scan(&settlementAdjustment)
+
 		balances[i] = dto.GroupBalanceItem{
 			UserID:     result.UserID,
 			UserName:   result.FirstName + " " + result.LastName,
 			TotalPaid:  result.TotalPaid,
 			TotalOwed:  result.TotalOwed,
-			NetBalance: result.TotalPaid - result.TotalOwed,
+			NetBalance: (result.TotalPaid - result.TotalOwed) + settlementAdjustment,
 		}
 	}
 
