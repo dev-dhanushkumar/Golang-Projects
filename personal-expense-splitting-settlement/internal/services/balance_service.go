@@ -125,13 +125,44 @@ func (s *balanceService) GetSettlementSuggestions(userID uuid.UUID) (*dto.Settle
 		}, nil
 	}
 
-	// Simplify debts using greedy algorithm
-	suggestions := simplifyDebts(balances)
+	// Get requesting user info
+	user, err := s.userRepo.FindByID(userID)
+	if err != nil {
+		return nil, err
+	}
+	userName := user.FirstName + " " + user.LastName
 
-	// Calculate total amount
+	// Convert balances to suggestions
+	// For individual user balances:
+	// - Positive amount means other user owes the requesting user
+	// - Negative amount means requesting user owes the other user
+	var suggestions []dto.SettlementSuggestion
 	var totalAmount float64
-	for _, suggestion := range suggestions {
-		totalAmount += suggestion.Amount
+
+	for _, balance := range balances {
+		if math.Abs(balance.Amount) > 0.01 { // Small threshold for floating point
+			if balance.Amount > 0 {
+				// Other user owes the requesting user
+				suggestions = append(suggestions, dto.SettlementSuggestion{
+					From:     balance.UserID,
+					FromName: balance.UserName,
+					To:       userID,
+					ToName:   userName,
+					Amount:   math.Round(balance.Amount*100) / 100,
+				})
+				totalAmount += balance.Amount
+			} else {
+				// Requesting user owes the other user
+				suggestions = append(suggestions, dto.SettlementSuggestion{
+					From:     userID,
+					FromName: userName,
+					To:       balance.UserID,
+					ToName:   balance.UserName,
+					Amount:   math.Round(math.Abs(balance.Amount)*100) / 100,
+				})
+				totalAmount += math.Abs(balance.Amount)
+			}
+		}
 	}
 
 	message := "Here are suggested settlements to simplify your balances"
